@@ -1,45 +1,359 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Algorithm Optimization</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delivery Route Optimizer | CPS 3440</title>
+  <meta name="description" content="Benchmarking BFS, Dijkstra, A*, Brute-Force and Nearest Neighbor for delivery route optimization on real New York City street data.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
-    <h1>Delivery Algorithm Optimization</h1>
+  <!-- ===== NAVIGATION ===== -->
+  <header class="site-header">
+    <nav class="nav container" aria-label="Main navigation">
+      <a href="#home" class="nav-logo">Delivery<span>Optimizer</span></a>
+      <ul class="nav-links">
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#dataset">Dataset</a></li>
+        <li><a href="#solution">Solution</a></li>
+        <li><a href="#algorithms">Algorithms</a></li>
+        <li><a href="#complexity">Complexity</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#demo">Demo</a></li>
+        <li><a href="#technologies">Tech</a></li>
+        <li><a href="#team">Team</a></li>
+        <li><a href="#resources">Resources</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <p>
-        This project focuses on comparing and analyzing different algorithms
-        for delivery route optimization.
-    </p>
+  <main>
 
-    <h2>Project Objective</h2>
+    <!-- ===== 1. HOME ===== -->
+    <section id="home" class="hero">
+      <div class="container hero-inner">
+        <p class="eyebrow">CPS 3440 · Analysis of Algorithms · Fall 2026</p>
+        <h1>Delivery Route Optimizer</h1>
+        <p class="hero-lead">
+          How much faster can a delivery route be computed with the right algorithm?
+          We implemented and benchmarked five routing algorithms on the real
+          New York City street network, from naive search to optimized
+          shortest-path and route-ordering strategies.
+        </p>
+        <div class="hero-actions">
+          <a href="https://github.com/WariL2001/Delivery-Algorithm-Optimization" class="btn btn-primary">View on GitHub</a>
+          <a href="#results" class="btn btn-secondary">See the Results</a>
+        </div>
+        <div class="hero-visual placeholder">
+          <!-- TODO: replace with screenshot of the route map (docs/img/hero-map.png) -->
+          Project visual coming soon: route map screenshot
+        </div>
+      </div>
+    </section>
 
-    <p>
-        The goal of this project is to evaluate multiple algorithms and compare
-        their performance under different delivery scenarios.
-    </p>
+    <!-- ===== 2. THE PROBLEM ===== -->
+    <section id="problem" class="section">
+      <div class="container">
+        <h2>The Problem</h2>
+        <p class="section-lead">
+          Every delivery company has to answer two questions, thousands of times a day.
+        </p>
+        <div class="grid-2">
+          <div class="card">
+            <h3>1. What is the shortest path from A to B?</h3>
+            <p>
+              Given a real street network, find the fastest route between two
+              locations, such as a restaurant and a customer. This is the
+              <strong>shortest-path problem</strong>, which can be solved efficiently.
+            </p>
+          </div>
+          <div class="card">
+            <h3>2. In what order should the stops be visited?</h3>
+            <p>
+              With several deliveries, the driver must choose the order of stops.
+              This is a version of the <strong>Traveling Salesman Problem (TSP)</strong>,
+              which is NP-hard: the number of possible orders grows factorially.
+            </p>
+          </div>
+        </div>
+        <p>
+          Our project compares how different algorithms handle each question,
+          and shows the difference between an <em>inefficient algorithm</em> and a
+          problem that is <em>computationally hard</em>.
+        </p>
+      </div>
+    </section>
 
-    <h2>Algorithms</h2>
+    <!-- ===== 3. DATASET ===== -->
+    <section id="dataset" class="section section-alt">
+      <div class="container">
+        <h2>Dataset</h2>
+        <p class="section-lead">All experiments use real, publicly available data.</p>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Primary: NYC Street Network</h3>
+            <p>Street network of New York City in GraphML format, where intersections are nodes and street segments are weighted edges.</p>
+            <ul class="facts">
+              <li><span>Source</span> <a href="https://www.kaggle.com/datasets/crailtap/street-network-of-new-york-in-graphml/data">Kaggle</a></li>
+              <li><span>Nodes</span> TBD</li>
+              <li><span>Edges</span> TBD</li>
+              <li><span>Edge weight</span> TBD (e.g., length in meters)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Supporting: Delivery Data</h3>
+            <p>Real delivery records used to generate realistic pickup and drop-off stops for the routing experiments.</p>
+            <ul class="facts">
+              <li><span>Source</span> TBD (Kaggle delivery dataset)</li>
+              <li><span>Records</span> TBD</li>
+              <li><span>Fields used</span> TBD</li>
+            </ul>
+          </div>
+        </div>
+        <p class="note">
+          Preprocessing steps, missing-data handling, limitations, and licensing
+          are documented in the repository and the technical paper.
+        </p>
+      </div>
+    </section>
 
-    <p>
-        The algorithms used for comparison will be determined as the project
-        develops.
-    </p>
+    <!-- ===== 4. OUR SOLUTION ===== -->
+    <section id="solution" class="section">
+      <div class="container">
+        <h2>Our Solution</h2>
+        <p class="section-lead">A two-stage routing pipeline built and benchmarked from scratch.</p>
+        <ol class="steps">
+          <li>
+            <h3>Load the city as a graph</h3>
+            <p>The NYC street network is converted into an adjacency-list graph.</p>
+          </li>
+          <li>
+            <h3>Compute shortest paths between stops</h3>
+            <p>BFS, Dijkstra, and A* each find routes between delivery points, and we compare their speed and the number of nodes they explore.</p>
+          </li>
+          <li>
+            <h3>Choose the order of deliveries</h3>
+            <p>Brute-Force finds the optimal order for small sets of stops; Nearest Neighbor finds a fast approximate order for larger sets.</p>
+          </li>
+          <li>
+            <h3>Benchmark and visualize</h3>
+            <p>Every algorithm is timed across increasing input sizes, and routes are drawn on an interactive map.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
 
-    <h2>Dataset</h2>
+    <!-- ===== 5. ALGORITHMS ===== -->
+    <section id="algorithms" class="section section-alt">
+      <div class="container">
+        <h2>Algorithms</h2>
+        <p class="section-lead">All core algorithms were implemented by the team, not called from a library.</p>
 
-    <p>
-        Dataset information will be added once the dataset is selected.
-    </p>
+        <h3 class="subhead">Stage 1: Shortest path (A → B)</h3>
+        <div class="grid-3">
+          <div class="card algo">
+            <span class="tag tag-baseline">Baseline</span>
+            <h4>Breadth-First Search</h4>
+            <p>Explores the graph level by level. Finds the path with the fewest street segments, but ignores distance, so it is not optimal on a weighted map.</p>
+          </div>
+          <div class="card algo">
+            <span class="tag tag-efficient">Efficient</span>
+            <h4>Dijkstra's Algorithm</h4>
+            <p>Uses a priority queue to always expand the closest unvisited node. Guarantees the shortest path when all edge weights are non-negative.</p>
+          </div>
+          <div class="card algo">
+            <span class="tag tag-optimized">Optimized</span>
+            <h4>A* Search</h4>
+            <p>Dijkstra guided by a heuristic (straight-line distance to the goal). Still optimal with an admissible heuristic, but explores far fewer nodes.</p>
+          </div>
+        </div>
 
-    <h2>Team Members</h2>
+        <h3 class="subhead">Stage 2: Delivery order (multi-stop)</h3>
+        <div class="grid-2">
+          <div class="card algo">
+            <span class="tag tag-baseline">Exact</span>
+            <h4>Brute-Force Route Search</h4>
+            <p>Tries every possible order of stops and keeps the cheapest. Always optimal, but only feasible for a small number of stops.</p>
+          </div>
+          <div class="card algo">
+            <span class="tag tag-efficient">Heuristic</span>
+            <h4>Nearest Neighbor</h4>
+            <p>Greedy strategy: always drive to the closest unvisited stop next. Very fast, but the resulting route is not guaranteed to be optimal.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <p>
-        Team member information will be added here.
-    </p>
+    <!-- ===== 6. COMPLEXITY ===== -->
+    <section id="complexity" class="section">
+      <div class="container">
+        <h2>Complexity</h2>
+        <p class="section-lead">
+          V = intersections (nodes), E = street segments (edges), n = number of delivery stops.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>Time</th>
+                <th>Space</th>
+                <th>Optimal?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>BFS</td>
+                <td><code>O(V + E)</code></td>
+                <td><code>O(V)</code></td>
+                <td>Only on unweighted graphs</td>
+              </tr>
+              <tr>
+                <td>Dijkstra (binary heap)</td>
+                <td><code>O((V + E) log V)</code></td>
+                <td><code>O(V)</code></td>
+                <td>Yes (non-negative weights)</td>
+              </tr>
+              <tr>
+                <td>A* (binary heap)</td>
+                <td><code>O((V + E) log V)</code> worst case</td>
+                <td><code>O(V)</code></td>
+                <td>Yes (admissible heuristic)</td>
+              </tr>
+              <tr>
+                <td>Brute-Force (TSP)</td>
+                <td><code>O(n! · n)</code></td>
+                <td><code>O(n)</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>Nearest Neighbor (TSP)</td>
+                <td><code>O(n²)</code></td>
+                <td><code>O(n)</code></td>
+                <td>No (approximation)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">
+          Stage 2 complexities assume the distances between stops are already
+          computed by a Stage 1 algorithm. Full derivations are in the technical paper.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===== 7. RESULTS ===== -->
+    <section id="results" class="section section-alt">
+      <div class="container">
+        <h2>Results</h2>
+        <p class="section-lead">Benchmarks across increasing input sizes, with repeated trials.</p>
+        <div class="grid-2">
+          <div class="card placeholder chart-box">
+            <!-- TODO: Chart.js runtime chart (reads data/benchmarks.json) -->
+            Chart coming soon: runtime vs. input size
+          </div>
+          <div class="card placeholder chart-box">
+            <!-- TODO: Chart.js nodes explored chart -->
+            Chart coming soon: nodes explored per algorithm
+          </div>
+        </div>
+        <div class="card placeholder">
+          <!-- TODO: key findings once benchmarks are done -->
+          Key findings will be added after the benchmarking phase.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 8. DEMO ===== -->
+    <section id="demo" class="section">
+      <div class="container">
+        <h2>Demo &amp; Visualizations</h2>
+        <p class="section-lead">See how each algorithm explores the city to find a route.</p>
+        <div class="card placeholder demo-box">
+          <!-- TODO: Leaflet map with precomputed routes (data/routes/*.json) -->
+          Interactive route map coming soon
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 9. TECHNOLOGIES ===== -->
+    <section id="technologies" class="section section-alt">
+      <div class="container">
+        <h2>Technologies</h2>
+        <!-- TODO: keep this list accurate, only tools actually used -->
+        <ul class="chips">
+          <li>Python</li>
+          <li>Git &amp; GitHub</li>
+          <li>GitHub Pages</li>
+          <li>HTML / CSS / JavaScript</li>
+          <li>Chart.js</li>
+          <li>Leaflet.js</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== 10. TEAM ===== -->
+    <section id="team" class="section">
+      <div class="container">
+        <h2>Team</h2>
+        <!-- TODO: confirm each member's contribution; must match CONTRIBUTIONS.md -->
+        <div class="grid-4">
+          <div class="card member">
+            <h3>Carlos Funez</h3>
+            <p class="role">Brute-Force Route Search &amp; BFS</p>
+            <p class="links"><a href="#">GitHub</a> · <a href="#">LinkedIn</a></p>
+          </div>
+          <div class="card member">
+            <h3>Omar Soliman</h3>
+            <p class="role">Role to be confirmed</p>
+            <p class="links"><a href="#">GitHub</a> · <a href="#">LinkedIn</a></p>
+          </div>
+          <div class="card member">
+            <h3>Calelle Polynice</h3>
+            <p class="role">Role to be confirmed</p>
+            <p class="links"><a href="#">GitHub</a> · <a href="#">LinkedIn</a></p>
+          </div>
+          <div class="card member">
+            <h3>Wari Lojano</h3>
+            <p class="role">Project website &amp; route visualization</p>
+            <p class="links"><a href="https://github.com/WariL2001">GitHub</a> · <a href="#">LinkedIn</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 11. RESOURCES ===== -->
+    <section id="resources" class="section section-alt">
+      <div class="container">
+        <h2>Resources</h2>
+        <div class="grid-3">
+          <a class="card resource" href="https://github.com/WariL2001/Delivery-Algorithm-Optimization">
+            <h3>GitHub Repository</h3>
+            <p>Source code, tests, and benchmarks.</p>
+          </a>
+          <a class="card resource disabled" href="#" aria-disabled="true">
+            <h3>Technical Paper</h3>
+            <p>Coming soon</p>
+          </a>
+          <a class="card resource disabled" href="#" aria-disabled="true">
+            <h3>Presentation</h3>
+            <p>Coming soon</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>CPS 3440 Analysis of Algorithms · Fall 2026 · Kean University</p>
+    </div>
+  </footer>
 
 </body>
 </html>
